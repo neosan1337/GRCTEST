@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GRC Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>GRC Dashboard</h1>
+      <span class="muted" id="as-of"></span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn ghost" id="theme-toggle" type="button" aria-label="Toggle colour theme">Theme</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button role="tab" data-tab="risks">Risk register</button>
+    <button role="tab" data-tab="compliance">Compliance</button>
+    <button role="tab" data-tab="findings">Audit findings</button>
+    <button role="tab" data-tab="policies">Policies</button>
+  </nav>
+
+  <main>
+    <!-- Overview -->
+    <section id="tab-overview" class="tab-panel" role="tabpanel">
+      <div class="kpis" id="kpis"></div>
+
+      <div class="grid-2">
+        <article class="card">
+          <header class="card-head">
+            <h2>Compliance by framework</h2>
+            <p class="muted">Implemented = 100%, partial = 50%</p>
+          </header>
+          <div id="framework-bars" class="hbars"></div>
+        </article>
+
+        <article class="card">
+          <header class="card-head">
+            <h2>Risk heat map</h2>
+            <p class="muted">Active risks by likelihood × impact. Click a cell to filter the register.</p>
+          </header>
+          <div id="heatmap"></div>
+        </article>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <header class="card-head">
+            <h2>Audit findings over time</h2>
+            <p class="muted">Count at each month end, last 12 months</p>
+          </header>
+          <div class="legend" id="trend-legend"></div>
+          <div id="trend" class="chart"></div>
+        </article>
+
+        <article class="card">
+          <header class="card-head">
+            <h2>Top risks</h2>
+            <p class="muted">Highest inherent score, not closed</p>
+          </header>
+          <ol class="toplist" id="top-risks"></ol>
+        </article>
+      </div>
+    </section>
+
+    <!-- Risks -->
+    <section id="tab-risks" class="tab-panel" role="tabpanel" hidden>
+      <div class="toolbar">
+        <input type="search" id="risk-search" placeholder="Search risks…" aria-label="Search risks">
+        <select id="risk-category" aria-label="Category"><option value="">All categories</option></select>
+        <select id="risk-status" aria-label="Status">
+          <option value="">All statuses</option>
+          <option value="active">Active (not closed)</option>
+          <option value="open">Open</option>
+          <option value="mitigating">Mitigating</option>
+          <option value="accepted">Accepted</option>
+          <option value="closed">Closed</option>
+        </select>
+        <span class="chip" id="cell-filter" hidden></span>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="risk-export" type="button">Export CSV</button>
+        <button class="btn ghost" id="risk-reset" type="button">Reset sample data</button>
+        <button class="btn" id="risk-add" type="button">Add risk</button>
+      </div>
+      <div class="card table-card">
+        <table class="data" id="risk-table">
+          <thead>
+            <tr>
+              <th data-sort="id">ID</th>
+              <th data-sort="title">Risk</th>
+              <th data-sort="category">Category</th>
+              <th data-sort="owner">Owner</th>
+              <th data-sort="likelihood" class="num">L</th>
+              <th data-sort="impact" class="num">I</th>
+              <th data-sort="score" class="num">Score</th>
+              <th data-sort="status">Status</th>
+              <th data-sort="due">Due</th>
+              <th><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="empty muted" id="risk-empty" hidden>No risks match these filters.</p>
+      </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="tab-compliance" class="tab-panel" role="tabpanel" hidden>
+      <div class="toolbar">
+        <select id="control-framework" aria-label="Framework"><option value="">All frameworks</option></select>
+        <select id="control-status" aria-label="Control status">
+          <option value="">All statuses</option>
+          <option value="implemented">Implemented</option>
+          <option value="partial">Partial</option>
+          <option value="missing">Not implemented</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data" id="control-table">
+          <thead>
+            <tr><th>Control</th><th>Framework</th><th>Name</th><th>Owner</th><th>Status</th><th>Last tested</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Findings -->
+    <section id="tab-findings" class="tab-panel" role="tabpanel" hidden>
+      <div class="toolbar">
+        <select id="finding-state" aria-label="Finding state">
+          <option value="open">Open</option>
+          <option value="overdue">Overdue</option>
+          <option value="closed">Closed</option>
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <table class="data" id="finding-table">
+          <thead>
+            <tr><th>ID</th><th>Finding</th><th>Source</th><th>Severity</th><th>Opened</th><th>Due</th><th>State</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Policies -->
+    <section id="tab-policies" class="tab-panel" role="tabpanel" hidden>
+      <div class="card table-card">
+        <table class="data" id="policy-table">
+          <thead>
+            <tr><th>ID</th><th>Policy</th><th>Owner</th><th>Version</th><th>Last reviewed</th><th>Next review</th><th>Attestation</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="risk-dialog">
+    <form method="dialog" id="risk-form">
+      <h2 id="risk-dialog-title">Add risk</h2>
+      <label>Title <input name="title" required maxlength="140"></label>
+      <div class="form-row">
+        <label>Category <input name="category" list="category-list" required></label>
+        <label>Owner <input name="owner" required></label>
+      </div>
+      <div class="form-row">
+        <label>Likelihood (1–5) <input name="likelihood" type="number" min="1" max="5" value="3" required></label>
+        <label>Impact (1–5) <input name="impact" type="number" min="1" max="5" value="3" required></label>
+      </div>
+      <div class="form-row">
+        <label>Status
+          <select name="status">
+            <option value="open">Open</option>
+            <option value="mitigating">Mitigating</option>
+            <option value="accepted">Accepted</option>
+            <option value="closed">Closed</option>
+          </select>
+        </label>
+        <label>Due date <input name="due" type="date" required></label>
+      </div>
+      <datalist id="category-list"></datalist>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate type="submit">Cancel</button>
+        <button class="btn" value="save" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
